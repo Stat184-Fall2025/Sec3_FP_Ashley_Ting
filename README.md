@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project explores how the Consumer Price Index (CPI) for food in the United States has changed over the past twenty years. By analyzing USDA Food Price Outlook data, we examine trends across time and food categories to understand how food price inflation has evolved, including notable shifts during major economic events like the COVID-19 pandemic.
+This project examines how food price inflation in the United States has changed over time using the Consumer Price Index (CPI). Specifically, we analyze the year by year CPI percentage change from 2005 to 2024 and summarize USDA forecasted values for 2025–2026. In addition, we extend the analysis to four specific food categories (eggs, pork, beef and veal, and fresh fruits) to highlight how inflation patterns differ substantially across food types.
+
+The goal of the project is to better understand long-term trends in food inflation, identify periods of unusually high or low price changes, and compare historical behavior with USDA forecasts.
 
 ### Interesting Insight
 
@@ -11,15 +13,22 @@ One key insight from our analysis is that food price inflation experienced a sig
 
 ## Data Sources and Acknowledgements
 
-We used publicly available data from the USDA Economic Research Service (ERS) Food Price Outlook. This dataset provides historical and forecasted values of the Consumer Price Index (CPI) for food categories and is updated regularly. 
+All data used in this project come from the USDA Economic Research Service (ERS) Food Price Outlook. The data is publicly available, updated regularly, and suitable for reproducible analysis.
 
-Data Source: https://www.ers.usda.gov/data-products/food-price-outlook
+Historical data (2005–2024):
+historicalcpi.csv, which reports annual year-over-year percent changes in the CPI.
+
+Forecast data (2025–2026):
+CPIForecast.csv, using the midpoint of the USDA prediction intervals for the All food CPI and selected food categories.
+
+Primary Data Source:
+https://www.ers.usda.gov/data-products/food-price-outlook
 
 We also acknowledge the support of course materials and guidance from the STAT 184 instructor and project template resources.
 
 ## Current Plan
 
-Our project workflow includes:
+Our project plan includes:
 
 Data Wrangling & Cleaning:
 Importing the USDA Food Price Outlook data, checking for tidy structure, and cleaning where necessary for analysis.
