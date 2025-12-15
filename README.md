@@ -1,22 +1,42 @@
 # Project Title
 
-Write a 1-2 sentences that quickly and clearly convey what your repo is for.
+How Have Food CPI Trends Changed Over the Past Two Decades?
 
 ## Overview
 
-Expand on those introductory sentences with a brief but informative description of your project's purpose and goals. This section should help visitors decide whether they should dig deeper into your repo/project.
+This project explores how the Consumer Price Index (CPI) for food in the United States has changed over the past twenty years. By analyzing USDA Food Price Outlook data, we examine trends across time and food categories to understand how food price inflation has evolved, including notable shifts during major economic events like the COVID-19 pandemic.
 
-### Interesting Insight (Optional)
+### Interesting Insight
 
-This is optional but highly recommended. You'll include one interesting insight from your project as part of the README. This insight is most effective when you include a visual. Keep in mind that this visual must be included as an image file (e.g., JPG, PNG, etc.). You can export plots created with `{ggplot2}` by using the function `ggsave`.
+One key insight from our analysis is that food price inflation experienced a significant spike around 2021–2022, with many categories showing sharp increases compared to previous years. This spike appears to be associated with pandemic-related supply chain disruptions and broader inflationary pressures that affected retail food prices across the country.
+<img width="1732" height="1490" alt="visualation 1" src="https://github.com/user-attachments/assets/87e746ab-8e33-465e-9485-f4e38eca8080" />
 
 ## Data Sources and Acknowledgements
 
-Be sure to list where you got any data used within the project. Be sure to acknowledge any one whose work or elements you're drawing upon.
+We used publicly available data from the USDA Economic Research Service (ERS) Food Price Outlook. This dataset provides historical and forecasted values of the Consumer Price Index (CPI) for food categories and is updated regularly. 
+
+Data Source: https://www.ers.usda.gov/data-products/food-price-outlook
+
+We also acknowledge the support of course materials and guidance from the STAT 184 instructor and project template resources.
 
 ## Current Plan
 
-Provide some information about what you intend to doe with the project. You can additionally refer the visitor to your detailed plan document.
+Our project workflow includes:
+
+Data Wrangling & Cleaning:
+Importing the USDA Food Price Outlook data, checking for tidy structure, and cleaning where necessary for analysis.
+
+Exploratory Data Analysis (EDA):
+Creating visualizations that show overall trends in CPI and differences across food categories.
+
+Statistical Summaries:
+Using descriptive statistics (e.g., dplyr::summarize(), psych::describe()) to summarize key patterns in the data.
+
+Ethics & Open Science Reflection:
+Discussing how the data satisfy FAIR and CARE principles and documenting coding practices using the PCIP system.
+
+Final Report:
+Rendering a reproducible Quarto PDF that ties together narrative text, figures, tables, and code documentation.
 
 ## Repo Structure
 
