@@ -3,8 +3,8 @@ install.packages("tidyverse")
 library(tidyverse)
 
 # Load CPI data (reproducible within GitHub)
-historical_raw <- read_csv("historicalcpi.csv")
-forecast_raw   <- read_csv("CPIForecast.csv")
+historical_raw <- read_csv("Data Sources (CSV)/historicalcpi.csv")
+forecast_raw   <- read_csv("Data Sources (CSV)/CPIForecast.csv")
 
 # Open both datasets in spreadsheet view (RStudio)
 View(historical_raw) 
