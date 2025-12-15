@@ -2,9 +2,9 @@
 install.packages("tidyverse")
 library(tidyverse)
 
-# Data import (CSV files stored in the GitHub repo)
-historical_raw <- read_csv("historicalcpi.csv")
-forecast_raw   <- read_csv("CPIForecast.csv")
+# Load CPI data (reproducible within GitHub)
+historical_raw <- read_csv("Data Sources (CSV)/historicalcpi.csv")
+forecast_raw   <- read_csv("Data Sources (CSV)/CPIForecast.csv")
 
 View(historical_raw) 
 View(forecast_raw)   
