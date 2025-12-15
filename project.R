@@ -1,86 +1,77 @@
-# Step 1.1 Install tidyverse 
-install.packages("tidyverse")   # Installs the tidyverse collection (dplyr, ggplot2, readr, etc.) for data wrangling and visualization
+# Install tidyverse 
+install.packages("tidyverse")
+library(tidyverse)
 
-# Step 1.2 Load tidyverse
-library(tidyverse)              # Loads tidyverse so we can use functions like read_csv(), filter(), mutate(), ggplot(), etc.
+# Load CPI data (reproducible within GitHub)
+historical_raw <- read_csv("historicalcpi.csv")
+forecast_raw   <- read_csv("CPIForecast.csv")
 
-# Step 2.1 Load the historical CPI data from Desktop
-historical_raw <- read_csv("~/Desktop/184 project/historicalcpi.csv")   # Reads the historical CPI file from your Desktop into R
+# Open both datasets in spreadsheet view (RStudio)
+View(historical_raw) 
+View(forecast_raw)   
 
-# Step 2.2 Load the forecast CPI data from Desktop
-forecast_raw   <- read_csv("~/Desktop/184 project/CPIForecast.csv")     # Reads the USDA forecast file from your Desktop into R
-
-# Step 2.3 Open both datasets in spreadsheet view (RStudio)
-View(historical_raw)   # Opens the historical CPI dataset in a spreadsheet-like window so you can inspect rows and columns
-View(forecast_raw)     # Opens the forecast dataset in a spreadsheet-like window to see its structure and content
-
-# Step 3.1 Create a cleaned historical dataset for All food (2005–2024)
+# All food CPI (Historical: 2005–2024)
 allfood_hist <- historical_raw %>%
-  filter(str_detect(`Consumer Price Index item`, "All food"),  # Keep rows where the item text contains "All food"
-         Year >= 2005, Year <= 2024) %>%                      # Restrict the years to 2005–2024
-  mutate(Year = as.integer(Year)) %>%                         # Ensure Year is stored as an integer
-  rename(pct_change = `Percent change`) %>%                   # Rename Percent change to pct_change
-  mutate(type = "Historical") %>%                             # Tag these rows as Historical values
-  select(Year, pct_change, type)                              # Keep only the three columns we need
+  filter(str_detect(`Consumer Price Index item`, "All food"),
+         Year >= 2005, Year <= 2024) %>%
+  mutate(Year = as.integer(Year)) %>%
+  rename(pct_change = `Percent change`) %>%
+  mutate(type = "Historical") %>%
+  select(Year, pct_change, type)
 
-View(allfood_hist)                                            # Inspect the cleaned historical All food data
+View(allfood_hist)
 
-# Step 3.2 Create a cleaned forecast dataset for top-level All food (2025–2026)
-
+# All food CPI (Forecast midpoints: 2025–2026)
 allfood_fc <- forecast_raw %>%
-  filter(`Top-level` == "All food") %>%                # Keep only rows where Top-level is exactly "All food"
-  filter(is.na(Aggregate)) %>%                         # Keep only the top-level All food rows (no subcategories)
+  filter(`Top-level` == "All food") %>%
+  filter(is.na(Aggregate)) %>%
   filter(Attribute %in% c("Mid point of prediction interval 2025",
-                          "Mid point of prediction interval 2026")) %>%  # Keep only midpoint forecasts for 2025 and 2026
+                          "Mid point of prediction interval 2026")) %>%
   mutate(
-    Year       = parse_number(Attribute),              # Extract the year (2025 or 2026) from the Attribute text
-    pct_change = Value,                                # Use Value as the forecasted percent change
-    type       = "Forecast"                            # Tag these rows as Forecast values
+    Year       = parse_number(Attribute),
+    pct_change = Value,
+    type       = "Forecast"
   ) %>%
-  select(Year, pct_change, type)                       # Keep only Year, pct_change, and type
+  select(Year, pct_change, type)
 
-View(allfood_fc)                                       # Inspect the cleaned forecast All food data
+View(allfood_fc)
 
-# Step 4.1 Combine historical and forecast data into one table
-allfood_cpi <- bind_rows(allfood_hist, allfood_fc) %>%  # Stack the Historical and Forecast tables on top of each other
-  arrange(Year)                                         # Sort the combined data by Year in ascending order
+# Combine historical + forecast into one dataset
+allfood_cpi <- bind_rows(allfood_hist, allfood_fc) %>%
+  arrange(Year)
 
-# Step 4.2 Inspect the combined dataset
-View(allfood_cpi)                                       # Open the combined table to confirm it has years 2005–2026 and both types
+View(allfood_cpi)
 
-
-# Step 5.0 Create a dataset for the forecast line that starts from 2024
+# Build helper datasets so the forecast line starts at 2024 (last historical point)
 forecast_line <- allfood_hist %>%
-  filter(Year == 2024) %>%                 # Use the last historical year (2024) as the starting point
-  mutate(type = "Forecast") %>%            # Label this row as Forecast
-  bind_rows(allfood_fc %>%                 # Add the 2025–2026 forecast rows
+  filter(Year == 2024) %>%
+  mutate(type = "Forecast") %>%
+  bind_rows(allfood_fc %>%
               mutate(type = "Forecast"))
 
-# Step 5.0b Build helper datasets and fix factor levels for 'type'
 lines_df <- bind_rows(
-  allfood_hist %>% mutate(type = "Historical"),  # 2005–2024
-  forecast_line                                   # 2024–2026
+  allfood_hist %>% mutate(type = "Historical"),
+  forecast_line
 ) %>%
   mutate(type = factor(type, levels = c("Historical", "Forecast")))
 
 points_df <- bind_rows(
-  allfood_hist %>% mutate(type = "Historical"),  # 2005–2024
-  allfood_fc   %>% mutate(type = "Forecast")     # 2025–2026
+  allfood_hist %>% mutate(type = "Historical"),
+  allfood_fc   %>% mutate(type = "Forecast")
 ) %>%
   mutate(type = factor(type, levels = c("Historical", "Forecast")))
 
-# Step 5.1 Final plot
+# Plot 1: All food CPI percent change (Historical vs Forecast)
 food_cpi_plot <- ggplot(lines_df,
                         aes(x = Year,
                             y = pct_change,
                             linetype = type,
-                            color    = type)) +   # Both linetype & color depend on 'type'
-  geom_line(linewidth = 1) +                      # Draw lines
+                            color    = type)) +
+  geom_line(linewidth = 1) +
   geom_point(data = points_df,
              aes(x = Year, y = pct_change,
                  color = type),
-             size = 2) +                          # Draw points
-  # Here we explicitly define color & linetype mapping
+             size = 2) +
   scale_linetype_manual(
     name   = "Data type",
     breaks = c("Historical", "Forecast"),
@@ -92,8 +83,8 @@ food_cpi_plot <- ggplot(lines_df,
   scale_color_manual(
     name   = "Data type",
     breaks = c("Historical", "Forecast"),
-    values = c("Historical" = "black",   # Historical = black
-               "Forecast"   = "blue"),   # Forecast   = blue
+    values = c("Historical" = "black",
+               "Forecast"   = "blue"),
     labels = c("Historical values (2005–2024)",
                "Forecast values (2025–2026)")
   ) +
@@ -113,42 +104,38 @@ food_cpi_plot <- ggplot(lines_df,
 
 food_cpi_plot
 
-#part 2
-#A
-# Vector of the four food categories we want to compare
+# Four categories: Eggs, Pork, Beef and veal, Fresh fruits
 items4 <- c("Eggs", "Pork", "Beef and veal", "Fresh fruits")
 
-# Historical data for the four items, 2005–2024
+# Historical data for the four categories (2005–2024)
 hist_4items <- historical_raw %>%
-  filter(`Consumer Price Index item` %in% items4,   # Keep only these four CPI items
-         Year >= 2005, Year <= 2024) %>%           # Restrict years to 2005–2024
+  filter(`Consumer Price Index item` %in% items4,
+         Year >= 2005, Year <= 2024) %>%
   mutate(
-    item       = `Consumer Price Index item`,       # Save the item name in a simpler column
+    item       = `Consumer Price Index item`,
     Year       = as.integer(Year),
-    pct_change = `Percent change`,                 # Rename Percent change to pct_change
-    type       = "Historical"                      # Tag all rows as Historical
+    pct_change = `Percent change`,
+    type       = "Historical"
   ) %>%
-  select(item, Year, pct_change, type)             # Keep only the columns we need
+  select(item, Year, pct_change, type)
 
-View(hist_4items)                                  # Check: 4 items × 20 years
+View(hist_4items)
 
-#B
-# Eggs: midpoint forecast for 2025 and 2026
+# Forecast midpoints for 2025–2026 for each category
 eggs_fc <- forecast_raw %>%
   filter(`Top-level` == "All food",
          Aggregate   == "Food at home",
          `Mid-level` == "Eggs",
-         str_detect(Attribute, "Mid point of prediction interval")) %>%  # 2025 & 2026
+         str_detect(Attribute, "Mid point of prediction interval")) %>%
   mutate(
     item       = "Eggs",
-    Year       = parse_number(Attribute),        # Extract 2025 or 2026
+    Year       = parse_number(Attribute),
     pct_change = Value,
     type       = "Forecast"
   ) %>%
-  filter(Year %in% c(2025, 2026)) %>%            # Keep only 2025–2026
+  filter(Year %in% c(2025, 2026)) %>%
   select(item, Year, pct_change, type)
 
-# Pork: midpoint forecast for 2025 and 2026
 pork_fc <- forecast_raw %>%
   filter(`Top-level` == "All food",
          Aggregate   == "Food at home",
@@ -165,7 +152,6 @@ pork_fc <- forecast_raw %>%
   filter(Year %in% c(2025, 2026)) %>%
   select(item, Year, pct_change, type)
 
-# Beef and veal: midpoint forecast for 2025 and 2026
 beef_fc <- forecast_raw %>%
   filter(`Top-level` == "All food",
          Aggregate   == "Food at home",
@@ -182,7 +168,6 @@ beef_fc <- forecast_raw %>%
   filter(Year %in% c(2025, 2026)) %>%
   select(item, Year, pct_change, type)
 
-# Fresh fruits: midpoint forecast for 2025 and 2026
 freshfruits_fc <- forecast_raw %>%
   filter(`Top-level` == "All food",
          Aggregate   == "Food at home",
@@ -199,38 +184,35 @@ freshfruits_fc <- forecast_raw %>%
   filter(Year %in% c(2025, 2026)) %>%
   select(item, Year, pct_change, type)
 
-# Combine forecasts for the four items (2025–2026)
+# Combine the four category forecasts (8 rows total)
 fc_4items <- bind_rows(eggs_fc, pork_fc, beef_fc, freshfruits_fc)
 
-View(fc_4items)   # Should have 8 rows: 4 items × 2 years (2025 & 2026)
+View(fc_4items)
 
-
-#C
-# Build line dataset: historical + forecast line segment starting from 2024
+# Make the dashed forecast segment start at 2024 for each category
 forecast_line_4items <- hist_4items %>%
-  filter(Year == 2024) %>%                     # Use 2024 as the starting point for the dashed line
-  mutate(type = "Forecast") %>%                # Label 2024 as Forecast for the dashed segment
-  bind_rows(fc_4items)                         # Add 2025–2026 forecast rows
+  filter(Year == 2024) %>%
+  mutate(type = "Forecast") %>%
+  bind_rows(fc_4items)
 
-lines_4items <- bind_rows(hist_4items, forecast_line_4items) %>%    # 2005–2024 (solid) + 2024–2026 (dashed)
+lines_4items <- bind_rows(hist_4items, forecast_line_4items) %>%
   mutate(
     type = factor(type, levels = c("Historical", "Forecast")),
     item = factor(item, levels = c("Eggs", "Pork", "Beef and veal", "Fresh fruits"))
   )
 
-# Build point dataset: historical points + true forecast points (2025–2026)
 points_4items <- bind_rows(hist_4items, fc_4items) %>%
   mutate(
     type = factor(type, levels = c("Historical", "Forecast")),
     item = factor(item, levels = c("Eggs", "Pork", "Beef and veal", "Fresh fruits"))
   )
 
-# Final multi-category plot: 4 lines, colors & shapes by item, dashed segment for forecasts
+# Plot 2: Four-category trend comparison (color + shape by category, dashed forecasts)
 cpi_4items_plot <- ggplot(lines_4items,
                           aes(x = Year,
                               y = pct_change,
-                              color    = item,      # Different colors for each category
-                              linetype = type)) +   # Solid = Historical, dashed = Forecast
+                              color    = item,
+                              linetype = type)) +
   geom_line(linewidth = 1) +
   geom_point(data = points_4items,
              aes(shape = item, color = item),
@@ -251,14 +233,14 @@ cpi_4items_plot <- ggplot(lines_4items,
   ) +
   scale_shape_manual(
     name   = "Food category",
-    values = c("Eggs"          = 16,   # filled circle
-               "Pork"          = 17,   # triangle
-               "Beef and veal" = 15,   # square
-               "Fresh fruits"  = 18)   # diamond
+    values = c("Eggs"          = 16,
+               "Pork"          = 17,
+               "Beef and veal" = 15,
+               "Fresh fruits"  = 18)
   ) +
   labs(
     title    = "Food Inflation by Category (CPI Percent Change), 2005–2026",
-    subtitle = "Historical percent changes for Eggs, Pork, Beef and veal, and Fresh fruits (2005–2024), plus USDA midpoint forecasts for 2025–2026",
+    subtitle = "Historical percent changes (2005–2024), plus USDA midpoint forecasts for 2025–2026",
     x        = "Year",
     y        = "Percent change (%)",
     caption  = "Source: USDA Economic Research Service, Food Price Outlook"
@@ -270,25 +252,25 @@ cpi_4items_plot <- ggplot(lines_4items,
     plot.subtitle   = element_text(margin = margin(b = 8))
   )
 
-cpi_4items_plot   # Draw the plot
+cpi_4items_plot
 
 
-#D
-# Combine historical and forecast data for the four items
+# Combine historical + forecast for bar chart view
 cpi_4items_all <- bind_rows(hist_4items, fc_4items) %>% 
   mutate(
-    type = factor(type, levels = c("Historical", "Forecast")),          # For alpha legend
+    type = factor(type, levels = c("Historical", "Forecast")),
     item = factor(item, levels = c("Eggs", "Pork", "Beef and veal", "Fresh fruits"))
   )
-# Bar chart: compare four categories over time (2005–2026)
+
+# Plot 3: Grouped bar chart (alpha indicates historical vs forecast)
 cpi_4items_bar <- ggplot(
   cpi_4items_all,
-  aes(x = factor(Year),                     # Treat Year as a categorical axis for bars
+  aes(x = factor(Year),
       y = pct_change,
-      fill  = item,                         # Different colors for the four food categories
-      alpha = type)                         # Stronger alpha for Historical, lighter for Forecast
+      fill  = item,
+      alpha = type)
 ) +
-  geom_col(position = position_dodge(width = 0.8)) +  # Side-by-side bars within each year
+  geom_col(position = position_dodge(width = 0.8)) +
   scale_fill_manual(
     name   = "Food category",
     values = c("Eggs"          = "orange",
@@ -298,14 +280,14 @@ cpi_4items_bar <- ggplot(
   ) +
   scale_alpha_manual(
     name   = "Data type",
-    values = c("Historical" = 1,    # Solid bars for historical values
-               "Forecast"   = 0.5), # Lighter bars for forecast values
+    values = c("Historical" = 1,
+               "Forecast"   = 0.5),
     labels = c("Historical (2005–2024)",
                "Forecast (2025–2026)")
   ) +
   labs(
     title    = "Food Inflation by Category (CPI Percent Change), 2005–2026",
-    subtitle = "Bars show yearly percent changes for Eggs, Pork, Beef and veal, and Fresh fruits;\nlighter bars indicate USDA midpoint forecasts for 2025–2026",
+    subtitle = "Bars show yearly percent changes; lighter bars indicate USDA midpoint forecasts for 2025–2026",
     x        = "Year",
     y        = "Percent change (%)",
     caption  = "Source: USDA Economic Research Service, Food Price Outlook"
@@ -315,25 +297,23 @@ cpi_4items_bar <- ggplot(
     legend.position = "right",
     plot.title      = element_text(face = "bold"),
     plot.subtitle   = element_text(margin = margin(b = 8)),
-    axis.text.x     = element_text(angle = 45, hjust = 1)  # Rotate x labels so years are readable
+    axis.text.x     = element_text(angle = 45, hjust = 1)
   )
 
 cpi_4items_bar
 
 
-# Summary table for four food categories:
-# historical mean/min/max (2005–2024) and forecasts for 2025–2026
-
+# Summary table: historical mean/min/max (2005–2024) + forecast midpoints (2025–2026)
 summary_4items <- hist_4items %>%
-  group_by(item) %>%                                         # Group by food category
+  group_by(item) %>%
   summarise(
-    mean_2005_2024 = mean(pct_change, na.rm = TRUE),         # Average historical inflation
-    min_2005_2024  = min(pct_change, na.rm = TRUE),          # Lowest historical year
-    max_2005_2024  = max(pct_change, na.rm = TRUE)           # Highest historical year
+    mean_2005_2024 = mean(pct_change, na.rm = TRUE),
+    min_2005_2024  = min(pct_change, na.rm = TRUE),
+    max_2005_2024  = max(pct_change, na.rm = TRUE)
   ) %>%
   left_join(
     fc_4items %>%
-      select(item, Year, pct_change) %>%                     # Keep only forecasts
+      select(item, Year, pct_change) %>%
       tidyr::pivot_wider(
         names_from  = Year,
         values_from = pct_change,
@@ -342,15 +322,14 @@ summary_4items <- hist_4items %>%
     by = "item"
   ) %>%
   mutate(
-    across(where(is.numeric), ~ round(.x, 1))                # Round all numeric columns to 1 decimal place
+    across(where(is.numeric), ~ round(.x, 1))
   ) %>%
-  arrange(item)                                              # Sort rows by item name
+  arrange(item)
 
-summary_4items                                               # View in console
+summary_4items
 
-# Make a cleaner version of the summary table for viewing / screenshot
+# Cleaned version of the summary table
 summary_4items_pretty <- summary_4items %>%
-  # Give columns clearer, presentation-style names
   rename(
     Item                 = item,
     `Mean 2005–2024 (%)` = mean_2005_2024,
@@ -359,11 +338,9 @@ summary_4items_pretty <- summary_4items %>%
     `Forecast 2025 (%)`  = forecast_2025,
     `Forecast 2026 (%)`  = forecast_2026
   ) %>%
-  # Ensure numeric values are nicely rounded (just in case)
   mutate(
-    across(where(is.numeric), ~ round(.x, 1))   # Keep 1 decimal place for all numeric columns
+    across(where(is.numeric), ~ round(.x, 1))
   ) %>%
-  arrange(Item)                                 # Sort rows by item name
+  arrange(Item)
 
-# Open the table in spreadsheet view (good for screenshot)
-View(summary_4items_pretty)                     # RStudio will show a clean table window
+View(summary_4items_pretty)
