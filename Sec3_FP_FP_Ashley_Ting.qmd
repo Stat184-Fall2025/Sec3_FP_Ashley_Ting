@@ -1,7 +1,7 @@
 ---
 title: "How Have Food CPI Trends Changed Over the Past Two Decades?"
 author: "Ashley Song"
-date: "December 17, 2025"
+date: "December 15, 2025"
 format:
   pdf:
     toc: false
@@ -101,7 +101,7 @@ This time-series plot shows that U.S. food inflation is not steady: it rises and
 #| fig-cap: "All food CPI percent change (historical values and USDA forecast midpoints), 2005–2026."
 #| fig-alt: "Time-series line chart of U.S. All food CPI percent change by year from 2005 to 2026. Historical values from 2005–2024 appear as a solid black line with points. Forecast midpoint values for 2025–2026 appear as a dashed blue line with points. The x-axis is Year and the y-axis is Percent change (%)."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 allfood_hist <- historical_raw %>%
   filter(str_detect(`Consumer Price Index item`, "All food"),
@@ -197,7 +197,7 @@ Comparing categories shows that inflation does not move uniformly across foods. 
 #| fig-cap: "Food CPI percent change by category (historical values and USDA forecast midpoints), 2005–2026."
 #| fig-alt: "Multi-line time-series plot of CPI percent change from 2005 to 2026 for Eggs, Pork, Beef and veal, and Fresh fruits. Historical values (2005–2024) are shown with solid lines and points, and forecast midpoints (2025–2026) are shown as dashed extensions. The x-axis is Year and the y-axis is Percent change (%). Colors and shapes distinguish food categories."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 items4 <- c("Eggs", "Pork", "Beef and veal", "Fresh fruits")
 
@@ -344,7 +344,7 @@ cpi_4items_plot
 
 ## Visualization 3: Category comparison (grouped bars)
 
-The grouped bar chart provides another view of category differences. Because bars are side-by-side within each year, it is easier to compare categories at a single time point. Forecast bars are lighter to emphasize that they are predicted values.
+The grouped bar chart provides another dplyr::glimpse of category differences. Because bars are side-by-side within each year, it is easier to compare categories at a single time point. Forecast bars are lighter to emphasize that they are predicted values.
 
 ```{r fig_category_bars}
 #| echo: false
@@ -354,7 +354,7 @@ The grouped bar chart provides another view of category differences. Because bar
 #| fig-cap: "Grouped bar chart comparing CPI percent change across food categories, 2005–2026."
 #| fig-alt: "Grouped bar chart of CPI percent change by year for Eggs, Pork, Beef and veal, and Fresh fruits from 2005 to 2026. Different colors represent categories, and bar transparency indicates data type: historical values are more opaque and forecast values are lighter. The x-axis is Year and the y-axis is Percent change (%)."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 cpi_4items_all <- bind_rows(hist_4items, fc_4items) %>% 
   mutate(
@@ -412,7 +412,7 @@ This table summarizes each category’s historical mean, minimum, and maximum pe
 #| echo: false
 #| tbl-cap: "Summary of food inflation by category: historical averages (2005–2024) and USDA forecasts (2025–2026)."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 summary_4items <- hist_4items %>%
   group_by(item) %>%
@@ -461,7 +461,7 @@ To complement the trend plot, this table isolates the most extreme historical ye
 #| echo: false
 #| tbl-cap: "Extremes in U.S. food inflation (All food CPI): three highest and three lowest annual percent changes, 2005–2024."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 allfood_extremes <- allfood_hist %>%
   select(Year, pct_change) %>%
@@ -490,7 +490,7 @@ knitr::kable(
 
 ## Visualization 4: Distribution of All food inflation (historical)
 
-The distribution view answers a different question than the time-series: instead of “when did inflation rise,” it asks “what do typical inflation years look like?” The histogram shows most years cluster around low-to-moderate inflation, while a smaller number of years have unusually high inflation.
+The distribution dplyr::glimpse answers a different question than the time-series: instead of “when did inflation rise,” it asks “what do typical inflation years look like?” The histogram shows most years cluster around low-to-moderate inflation, while a smaller number of years have unusually high inflation.
 
 ```{r fig_allfood_distribution}
 #| echo: false
@@ -500,7 +500,7 @@ The distribution view answers a different question than the time-series: instead
 #| fig-cap: "Distribution of annual All food CPI percent changes (historical only), 2005–2024."
 #| fig-alt: "Histogram of annual All food CPI percent changes from 2005 to 2024 with a smooth density curve overlaid. Bars show counts of years in each percent-change bin. The x-axis is Percent change (%) and the y-axis is Count."
 
-# Code Header: Primary Author: Ting Huang | Reviewer: Ashley Song
+# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
 
 allfood_dist_plot <- ggplot(allfood_hist, aes(x = pct_change)) +
   geom_histogram(
@@ -528,7 +528,10 @@ allfood_dist_plot
 # Author contributions
 
 - **Ting Huang (Primary Author):** data wrangling workflow, forecast filtering logic, and initial visualizations/tables.
-- **Ashley Song (Reviewer/Contributor):** repository organization, reproducibility improvements (relative paths), visualization sizing adjustments in Quarto, and narrative writing/interpretation additions.
+- **Ashley Song (Redplyr::glimpseer/Contributor):** repository organization, reproducibility improvements (relative paths), visualization sizing adjustments in Quarto, and narrative writing/interpretation additions.
+
+# References (MLA)
+United States Department of Agriculture, Economic Research Service. Food Price Outlook Datasets. U.S. Department of Agriculture, https://www.ers.usda.gov/data-products/food-price-outlook/
 
 # Code Appendix
 
@@ -537,16 +540,14 @@ Below is the full code used to generate the results in this document.
 ```{r code_appendix_full}
 #| echo: true
 
-# Install tidyverse 
-install.packages("tidyverse")
+# install.packages("tidyverse")  # run once in the Console if needed
 library(tidyverse)
 
-# Load CPI data (reproducible within GitHub)
-historical_raw <- read_csv("Data Sources (CSV)/historicalcpi.csv")
-forecast_raw   <- read_csv("Data Sources (CSV)/CPIForecast.csv")
+historical_raw <- read_csv("Data Sources (CSV)/historicalcpi.csv", show_col_types = FALSE)
+forecast_raw   <- read_csv("Data Sources (CSV)/CPIForecast.csv", show_col_types = FALSE)
 
-View(historical_raw) 
-View(forecast_raw)   
+dplyr::glimpse(historical_raw) 
+dplyr::glimpse(forecast_raw)   
 
 # Data wrangling + cleaning: All food CPI (Historical: 2005–2024)
 allfood_hist <- historical_raw %>%
@@ -557,7 +558,7 @@ allfood_hist <- historical_raw %>%
   mutate(type = "Historical") %>%
   select(Year, pct_change, type)
 
-View(allfood_hist)
+dplyr::glimpse(allfood_hist)
 
 # Data wrangling + cleaning: All food CPI (Forecast: 2025–2026 midpoints)
 allfood_fc <- forecast_raw %>%
@@ -572,13 +573,13 @@ allfood_fc <- forecast_raw %>%
   ) %>%
   select(Year, pct_change, type)
 
-View(allfood_fc)
+dplyr::glimpse(allfood_fc)
 
 # Combine datasets: All food CPI (Historical + Forecast)
 allfood_cpi <- bind_rows(allfood_hist, allfood_fc) %>%
   arrange(Year)
 
-View(allfood_cpi)
+dplyr::glimpse(allfood_cpi)
 
 # Helper datasets for Plot 1: make the dashed forecast line start at 2024 (last historical year)
 forecast_line <- allfood_hist %>%
@@ -656,7 +657,7 @@ hist_4items <- historical_raw %>%
   ) %>%
   select(item, Year, pct_change, type)
 
-View(hist_4items)
+dplyr::glimpse(hist_4items)
 
 # Data wrangling + cleaning: Four categories forecast values (2025–2026 midpoints)
 eggs_fc <- forecast_raw %>%
@@ -723,7 +724,7 @@ freshfruits_fc <- forecast_raw %>%
 
 fc_4items <- bind_rows(eggs_fc, pork_fc, beef_fc, freshfruits_fc)
 
-View(fc_4items)
+dplyr::glimpse(fc_4items)
 
 # Helper datasets for Plot 2: make the dashed forecast segment start at 2024 for each category
 forecast_line_4items <- hist_4items %>%
@@ -790,7 +791,7 @@ cpi_4items_plot <- ggplot(lines_4items,
 
 cpi_4items_plot
 
-# Data wrangling: combine historical + forecast for bar chart view
+# Data wrangling: combine historical + forecast for bar chart dplyr::glimpse
 cpi_4items_all <- bind_rows(hist_4items, fc_4items) %>% 
   mutate(
     type = factor(type, levels = c("Historical", "Forecast")),
@@ -877,7 +878,7 @@ summary_4items_pretty <- summary_4items %>%
   ) %>%
   arrange(Item)
 
-View(summary_4items_pretty)
+dplyr::glimpse(summary_4items_pretty)
 
 # Table 2: three highest and three lowest historical inflation years (All food, 2005–2024)
 allfood_extremes <- allfood_hist %>%
@@ -899,7 +900,7 @@ allfood_extremes <- allfood_hist %>%
 allfood_extremes_pretty <- allfood_extremes %>%
   rename(`Percent change (%)` = pct_change)
 
-View(allfood_extremes_pretty)
+dplyr::glimpse(allfood_extremes_pretty)
 
 # Plot 4: distribution of historical All food CPI percent changes (2005–2024)
 allfood_dist_plot <- ggplot(allfood_hist, aes(x = pct_change)) +
