@@ -1,6 +1,4 @@
-# Project Title
-
-How Have Food CPI Trends Changed Over the Past Two Decades?
+# How Have Food CPI Trends Changed Over the Past Two Decades?
 
 ## Overview
 
