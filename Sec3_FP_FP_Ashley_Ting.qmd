@@ -1,7 +1,7 @@
 ---
 title: "How Have Food CPI Trends Changed Over the Past Two Decades?"
-author: "Ashley Song"
-date: "December 15, 2025"
+author: "Ashley Song & Ting Huang"
+date: "December 17, 2025"
 format:
   pdf:
     toc: false
@@ -461,7 +461,7 @@ To complement the trend plot, this table isolates the most extreme historical ye
 #| echo: false
 #| tbl-cap: "Extremes in U.S. food inflation (All food CPI): three highest and three lowest annual percent changes, 2005–2024."
 
-# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
+# Code Header: Primary Author: Ashley Song | Redplyr::glimpseer: Ting Huang
 
 allfood_extremes <- allfood_hist %>%
   select(Year, pct_change) %>%
@@ -500,7 +500,7 @@ The distribution dplyr::glimpse answers a different question than the time-serie
 #| fig-cap: "Distribution of annual All food CPI percent changes (historical only), 2005–2024."
 #| fig-alt: "Histogram of annual All food CPI percent changes from 2005 to 2024 with a smooth density curve overlaid. Bars show counts of years in each percent-change bin. The x-axis is Percent change (%) and the y-axis is Count."
 
-# Code Header: Primary Author: Ting Huang | Redplyr::glimpseer: Ashley Song
+# Code Header: Primary Author: Ashley Song | Redplyr::glimpseer: Ting Huang
 
 allfood_dist_plot <- ggplot(allfood_hist, aes(x = pct_change)) +
   geom_histogram(
@@ -527,8 +527,9 @@ allfood_dist_plot
 
 # Author contributions
 
-- **Ting Huang (Primary Author):** data wrangling workflow, forecast filtering logic, and initial visualizations/tables.
-- **Ashley Song (Redplyr::glimpseer/Contributor):** repository organization, reproducibility improvements (relative paths), visualization sizing adjustments in Quarto, and narrative writing/interpretation additions.
+- **Ashley Song:** Repository organization tasks (README/structure, reproducibility checks), additional reporting text and interpretation, supporting analysis contributions, write and integrate all materials into final QMD report.
+- **Ting Huang:** Primary data wrangling workflow and creation of core visualizations, coordinated project analysis direction.
+- **Both:** Interpreting results, checking rubric requirements, and review each others' code.
 
 # References (MLA)
 United States Department of Agriculture, Economic Research Service. Food Price Outlook Datasets. U.S. Department of Agriculture, https://www.ers.usda.gov/data-products/food-price-outlook/
