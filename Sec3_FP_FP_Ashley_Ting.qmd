@@ -47,49 +47,67 @@ forecast_raw   <- read_csv(fc_path, show_col_types = FALSE)
 
 Food prices are one of the most visible ways households experience inflation. In this project, we focus on **year-to-year percent changes in the U.S. Consumer Price Index (CPI) for food** to answer:
 
-**How have food CPI trends changed over the past two decades (2005–2024), and what do USDA forecasts suggest for 2025–2026?**
+**How have food CPI trends (inflation rates) changed over the past two decades (2005–2024), and what do USDA forecasts suggest for 2025–2026?**
 
-We analyze overall **All food** inflation and compare patterns for four specific “food at home” categories: **Eggs, Pork, Beef and veal, and Fresh fruits**. We include USDA midpoint forecasts for 2025–2026 to provide short-term context.
+We analyze overall **All food** inflation and compare patterns for four specific common food categories: **Eggs, Pork, Beef and veal, and Fresh fruits**. We also include USDA midpoint forecasts for 2025–2026 to provide short-term context.
 
-# Data provenance
+# Data Provenance
 
 We use the USDA Economic Research Service (ERS) Food Price Outlook datasets, which include:
-- Historical CPI percent changes by item and year
-- Forecast prediction intervals, from which we use the **midpoint** values for 2025 and 2026
+
+1. Historical CPI percent changes by item and year
+2. Forecast prediction intervals, from which we use the **midpoint** values for 2025 and 2026
 
 Data Source: USDA ERS, *Food Price Outlook* (downloaded as CSV and stored in this repo).  
 
-# Fair and CARE principles
+# Paradigms and Perspectives
 
-**Fairness.** This analysis is descriptive: it summarizes CPI percent changes and USDA forecasts. We avoid making claims about specific households or groups, and we do not impute impacts on different populations. CPI is an aggregate measure and may not reflect individual shopping patterns.
+This project follows a **descriptive, exploratory data analysis paradigm** and a **functional, declarative coding paradigm**.
 
-**CARE (Collective Benefit, Authority to Control, Responsibility, Ethics).**
-- **Collective benefit:** We aim to present transparent, interpretable summaries of food inflation trends.
-- **Authority to control:** Data are publicly provided by USDA ERS; we preserve source attribution.
-- **Responsibility:** We document transformations and keep the workflow reproducible within the repository.
-- **Ethics:** We clearly label forecasts vs historical values and do not treat forecasts as observed truth.
+From a data analysis perspective, our goal is to **describe patterns, trends, variability, and extremes** in food CPI percent changes over time. Time-series plots, grouped bar charts, distributions, and summary tables are used to reveal how inflation behaves across years and food categories, and how recent USDA forecasts compare to historical patterns.
 
-# Attributes used
+From a coding perspective, the analysis uses a **functional programming style** implemented through the **tidyverse**. Data wrangling is expressed as a sequence of clear transformations (e.g., filtering, mutating, summarizing) connected with pipes. This paradigm was chosen because it improves readability, supports reproducibility, and aligns naturally with `ggplot2` for building layered, interpretable visualizations.
 
-Key attributes used in the wrangling:
-- `Year` (historical) and forecast year parsed from `Attribute`
-- `Consumer Price Index item` (historical CPI item name)
-- Hierarchy columns in the forecast file (e.g., `Top-level`, `Aggregate`, `Mid-level`, `Low-level`, `Disaggregate`)
-- `Percent change` (historical CPI percent change)
-- `Value` (forecast midpoint percent change)
-- A derived `type` label: `Historical` vs `Forecast`
 
-# Methods summary
+# Fair and CARE Principles
 
-1. Filter historical data to the period **2005–2024** and select relevant CPI items.
-2. Filter forecast data to the **midpoint** prediction interval values for **2025–2026**.
-3. Combine historical and forecast values.
-4. Visualize long-run trends, category comparisons, and distributional summaries.
-5. Create summary tables for interpretation.
+**FAIR**
+
+1. **(F) Findable:** The data come from the USDA Economic Research Service (ERS) Food Price Outlook website and are clearly cited. CSV files are stored in the repository with descriptive filenames so they can be easily located.
+2. **(A) Accessible:** The datasets are publicly available without restrictions and are loaded in this analysis using relative file paths, allowing others to access and rerun the project.
+3. **(I) Interoperable:** Data are stored in standard CSV format and use consistent variable names and structures, making them compatible with common data analysis tools and programming languages.
+4. **(R) Reusable:** All data cleaning, transformations, and visualizations are fully documented in code and narrative, enabling others to reproduce, verify, or extend the analysis.
+
+
+**CARE**
+
+1. **(C) Collective benefit:** We aim to present transparent, interpretable summaries of food inflation trends. 
+2. **(A) Authority to control:** Data are publicly provided by USDA ERS, we preserve source attribution.
+3. **(R) Responsibility:** We document transformations and keep the workflow reproducible within the repository.
+4. **(E) Ethics:** We clearly label forecasts vs historical values and do not treat forecasts as observed truth.
+
+
+# Attributes Used
+
+The analysis relies on several key attributes drawn from both the historical and forecast CPI datasets. Each observation includes a `Year` attribute, which represents the calendar year for historical data and is parsed from the `Attribute` field in the forecast dataset for projected values. Food categories are identified using the `Consumer Price Index item` attribute in the historical data, which specifies the type of food being measured.
+
+For the forecast data, a set of hierarchical attributes, such as `Top-level`, `Aggregate`, `Mid-level`, `Low-level`, and `Disaggregate`, is used to correctly identify and filter forecasted values for specific food categories. Historical inflation rates are measured using the `Percent change` attribute, while forecasted inflation rates are stored in the `Value` attribute and converted into a common percent-change variable for consistency across datasets. Finally, a derived categorical attribute, `type`, is introduced to distinguish between `Historical` observations and `Forecast` values, allowing both to be analyzed and visualized together while remaining conceptually distinct.
+
+
+# Data Structure and Tidying
+
+In the historical CPI dataset, each **case represents a single CPI item in a given year**, with the percent change describing how prices for that item changed relative to the previous year. In the forecast dataset, each **case represents a forecasted CPI item and prediction interval attribute**, from which the forecast year and midpoint value are derived.
+
+The data includes both identifying attributes (such as CPI item names and hierarchical category labels) and measurement attributes (historical percent changes and forecast midpoint values). For analysis, the data were tidied so that each row corresponds to a single item–year observation with a consistent percent-change variable and a derived indicator identifying whether the value is historical or forecasted. This structure supports straightforward comparison across years, categories, and data types.
+
+
+# Written Analysis Plan
+
+The analysis was designed to answer how U.S. food CPI percent changes have evolved over the past two decades and how short-term USDA forecasts compare to historical patterns. The plan was to first analyze the overall All food CPI series to establish a broad inflation context. Next, we examined four food-at-home categories to compare volatility and category-specific behavior. Visualizations were chosen to emphasize trends over time, cross-category comparisons, and distributional properties. Summary tables were then used to quantify historical averages, extremes, and forecast values to support interpretation.
 
 # Results
 
-## Visualization 1: All food CPI over time (historical + forecast)
+## Visualization 1: All food CPI Over Time (Historical + Forecast)
 
 This time-series plot shows that U.S. food inflation is not steady: it rises and falls over time with a noticeable spike in the early 2020s. The dashed segment shows USDA midpoint forecasts for 2025–2026, which suggest inflation returning to more moderate levels compared to the recent peak years.
 
@@ -183,9 +201,9 @@ food_cpi_plot <- ggplot(lines_df,
 food_cpi_plot
 ```
 
-**Long description:** The chart traces annual percent changes in All food CPI. Values fluctuate over time and include a prominent surge in the early 2020s. The forecast segment (dashed) extends from the last historical point and shows the predicted direction for 2025–2026.
+The chart traces annual percent changes in All food CPI. Values fluctuate over time and include a prominent surge in the early 2020s. The forecast segment (dashed) extends from the last historical point and shows the predicted direction for 2025–2026.
 
-## Visualization 2: Category trends (lines)
+## Visualization 2: Category Trends (Line Chart)
 
 Comparing categories shows that inflation does not move uniformly across foods. Some categories display larger volatility (bigger spikes and drops) than others. This helps explain why consumers may feel food inflation differently depending on what they buy most often.
 
@@ -340,9 +358,9 @@ cpi_4items_plot <- ggplot(lines_4items,
 cpi_4items_plot
 ```
 
-**Long description:** Each category is a colored line across years. Solid portions show historical values (2005–2024) and dashed portions show forecasts (2025–2026). The spacing between lines and the presence of sharp peaks indicate differences in volatility by category.
+Each category is a colored line across years. Solid portions show historical values (2005–2024) and dashed portions show forecasts (2025–2026). The spacing between lines and the presence of sharp peaks indicate differences in volatility by category.
 
-## Visualization 3: Category comparison (grouped bars)
+## Visualization 3: Category Comparison (Histogram)
 
 The grouped bar chart provides another dplyr::glimpse of category differences. Because bars are side-by-side within each year, it is easier to compare categories at a single time point. Forecast bars are lighter to emphasize that they are predicted values.
 
@@ -402,9 +420,9 @@ cpi_4items_bar <- ggplot(
 cpi_4items_bar
 ```
 
-**Long description:** For each year, four colored bars represent the four categories. Forecast-year bars appear lighter (more transparent). The chart highlights differences in inflation magnitude within the same year.
+For each year, four colored bars represent the four categories. Forecast-year bars appear lighter (more transparent). The chart highlights differences in inflation magnitude within the same year.
 
-## Table 1: Summary of historical levels and forecasts
+## Table 1: Summary Table of Historical Levels and Forecasts
 
 This table summarizes each category’s historical mean, minimum, and maximum percent change (2005–2024), alongside USDA midpoint forecasts for 2025 and 2026. It provides an at-a-glance comparison of typical inflation and the range of volatility for each category.
 
@@ -453,7 +471,7 @@ knitr::kable(
 )
 ```
 
-## Table 2: Extremes in All food inflation (historical)
+## Table 2: Extremes in All Food Inflation (Historical)
 
 To complement the trend plot, this table isolates the most extreme historical years in the All food series. Extreme years can help explain “why the line looks the way it does” and provides concrete values for discussion.
 
@@ -488,7 +506,7 @@ knitr::kable(
 )
 ```
 
-## Visualization 4: Distribution of All food inflation (historical)
+## Visualization 4: Distribution of All Food Inflation (Historical)
 
 The distribution dplyr::glimpse answers a different question than the time-series: instead of “when did inflation rise,” it asks “what do typical inflation years look like?” The histogram shows most years cluster around low-to-moderate inflation, while a smaller number of years have unusually high inflation.
 
@@ -523,9 +541,35 @@ allfood_dist_plot <- ggplot(allfood_hist, aes(x = pct_change)) +
 allfood_dist_plot
 ```
 
-**Long description:** Most years fall into low-to-moderate percent changes, while the density curve shows the overall shape and highlights the presence of a right tail from a small number of high-inflation years.
+Most years fall into low-to-moderate percent changes, while the density curve shows the overall shape and highlights the presence of a right tail from a small number of high-inflation years.
 
-# Author contributions
+# Final Discussion & Hypotheses (Referencing & Interpretation)
+
+Across all visualizations and tables, U.S. food CPI trends from 2005–2024 show substantial variability rather than steady growth, with a pronounced spike in the early 2020s. This spike stands out in the All food time series (Figure 1) and is reinforced by the extreme values summarized in Table 2, indicating that recent food inflation is unusually high relative to most of the historical period.
+
+Category-level comparisons (Figures 2 and 3, Table 1) reveal that inflation differs markedly across food types. Eggs and Beef and veal display greater volatility and wider historical ranges than other categories. A plausible hypothesis is that animal-based products are more sensitive to supply disruptions, input costs, and disease-related shocks, while Fresh fruits may be more influenced by seasonal and weather-related factors.
+
+The distribution of historical All food CPI changes (Figure 4) shows that most years cluster around moderate inflation, with a small number of extreme years driving the upper tail. This context suggests that recent inflation represents an exceptional episode rather than a typical pattern.
+
+Finally, USDA midpoint forecasts for 2025–2026 suggest a moderation in food inflation. While forecasts should not be treated as observed outcomes, they may reflect expectations of stabilizing supply chains and easing cost pressures.
+
+Overall, the results indicate that food inflation over the past two decades is characterized by episodic spikes and category-specific dynamics, helping explain why consumer experiences of food price changes can vary widely.
+
+
+# PCIP System Documentation
+
+This project follows the **PCIP (Plan–Code–Interpret–Present) system** throughout both the analysis and coding process.
+
+**Plan.** Before coding, we identified the core question (how food CPI trends have changed over time), selected relevant CPI categories, and determined which visualizations would best highlight trends, comparisons, and distributions. We identified all our needs and steps to be able to break down this 
+
+**Code.** Data wrangling and visualization were implemented using well-commented, modular code. Transformations are expressed using tidyverse pipelines, and separate code sections correspond to specific analytical tasks (data cleaning, combining historical and forecast data, visualization, and table construction).
+
+**Interpret.** Each figure and table is followed by written interpretation that describes key visual features and connects them to the broader context of food inflation and USDA forecasts.
+
+**Present.** Results are presented in a structured Quarto document with clearly labeled sections, captions, alt text, and formatted tables. A complete code appendix is included to ensure transparency and reproducibility.
+
+
+# Author Contributions
 
 - **Ashley Song:** Repository organization tasks (README/structure, reproducibility checks), additional reporting text and interpretation, supporting analysis contributions, write and integrate all materials into final QMD report.
 - **Ting Huang:** Primary data wrangling workflow and creation of core visualizations, coordinated project analysis direction.
