@@ -2,15 +2,14 @@
 install.packages("tidyverse")
 library(tidyverse)
 
-# Load CPI data (reproducible within GitHub)
+# Data import (CSV files stored in the GitHub repo)
 historical_raw <- read_csv("historicalcpi.csv")
 forecast_raw   <- read_csv("CPIForecast.csv")
 
-# Open both datasets in spreadsheet view (RStudio)
 View(historical_raw) 
 View(forecast_raw)   
 
-# All food CPI (Historical: 2005–2024)
+# Data wrangling + cleaning: All food CPI (Historical: 2005–2024)
 allfood_hist <- historical_raw %>%
   filter(str_detect(`Consumer Price Index item`, "All food"),
          Year >= 2005, Year <= 2024) %>%
@@ -21,7 +20,7 @@ allfood_hist <- historical_raw %>%
 
 View(allfood_hist)
 
-# All food CPI (Forecast midpoints: 2025–2026)
+# Data wrangling + cleaning: All food CPI (Forecast: 2025–2026 midpoints)
 allfood_fc <- forecast_raw %>%
   filter(`Top-level` == "All food") %>%
   filter(is.na(Aggregate)) %>%
@@ -36,13 +35,13 @@ allfood_fc <- forecast_raw %>%
 
 View(allfood_fc)
 
-# Combine historical + forecast into one dataset
+# Combine datasets: All food CPI (Historical + Forecast)
 allfood_cpi <- bind_rows(allfood_hist, allfood_fc) %>%
   arrange(Year)
 
 View(allfood_cpi)
 
-# Build helper datasets so the forecast line starts at 2024 (last historical point)
+# Helper datasets for Plot 1: make the dashed forecast line start at 2024 (last historical year)
 forecast_line <- allfood_hist %>%
   filter(Year == 2024) %>%
   mutate(type = "Forecast") %>%
@@ -61,7 +60,7 @@ points_df <- bind_rows(
 ) %>%
   mutate(type = factor(type, levels = c("Historical", "Forecast")))
 
-# Plot 1: All food CPI percent change (Historical vs Forecast)
+# Plot 1: All food CPI percent change over time
 food_cpi_plot <- ggplot(lines_df,
                         aes(x = Year,
                             y = pct_change,
@@ -104,10 +103,9 @@ food_cpi_plot <- ggplot(lines_df,
 
 food_cpi_plot
 
-# Four categories: Eggs, Pork, Beef and veal, Fresh fruits
+# Data wrangling + cleaning: Four categories (Eggs, Pork, Beef and veal, Fresh fruits)
 items4 <- c("Eggs", "Pork", "Beef and veal", "Fresh fruits")
 
-# Historical data for the four categories (2005–2024)
 hist_4items <- historical_raw %>%
   filter(`Consumer Price Index item` %in% items4,
          Year >= 2005, Year <= 2024) %>%
@@ -121,7 +119,7 @@ hist_4items <- historical_raw %>%
 
 View(hist_4items)
 
-# Forecast midpoints for 2025–2026 for each category
+# Data wrangling + cleaning: Four categories forecast values (2025–2026 midpoints)
 eggs_fc <- forecast_raw %>%
   filter(`Top-level` == "All food",
          Aggregate   == "Food at home",
@@ -184,12 +182,11 @@ freshfruits_fc <- forecast_raw %>%
   filter(Year %in% c(2025, 2026)) %>%
   select(item, Year, pct_change, type)
 
-# Combine the four category forecasts (8 rows total)
 fc_4items <- bind_rows(eggs_fc, pork_fc, beef_fc, freshfruits_fc)
 
 View(fc_4items)
 
-# Make the dashed forecast segment start at 2024 for each category
+# Helper datasets for Plot 2: make the dashed forecast segment start at 2024 for each category
 forecast_line_4items <- hist_4items %>%
   filter(Year == 2024) %>%
   mutate(type = "Forecast") %>%
@@ -207,7 +204,7 @@ points_4items <- bind_rows(hist_4items, fc_4items) %>%
     item = factor(item, levels = c("Eggs", "Pork", "Beef and veal", "Fresh fruits"))
   )
 
-# Plot 2: Four-category trend comparison (color + shape by category, dashed forecasts)
+# Plot 2: Four-category trend comparison
 cpi_4items_plot <- ggplot(lines_4items,
                           aes(x = Year,
                               y = pct_change,
@@ -254,15 +251,14 @@ cpi_4items_plot <- ggplot(lines_4items,
 
 cpi_4items_plot
 
-
-# Combine historical + forecast for bar chart view
+# Data wrangling: combine historical + forecast for bar chart view
 cpi_4items_all <- bind_rows(hist_4items, fc_4items) %>% 
   mutate(
     type = factor(type, levels = c("Historical", "Forecast")),
     item = factor(item, levels = c("Eggs", "Pork", "Beef and veal", "Fresh fruits"))
   )
 
-# Plot 3: Grouped bar chart (alpha indicates historical vs forecast)
+# Plot 3: Grouped bar chart
 cpi_4items_bar <- ggplot(
   cpi_4items_all,
   aes(x = factor(Year),
@@ -302,8 +298,7 @@ cpi_4items_bar <- ggplot(
 
 cpi_4items_bar
 
-
-# Summary table: historical mean/min/max (2005–2024) + forecast midpoints (2025–2026)
+# Table: historical mean/min/max (2005–2024) + forecast midpoints (2025–2026)
 summary_4items <- hist_4items %>%
   group_by(item) %>%
   summarise(
@@ -328,7 +323,7 @@ summary_4items <- hist_4items %>%
 
 summary_4items
 
-# Cleaned version of the summary table
+# Table 1: cleaned version of the summary table
 summary_4items_pretty <- summary_4items %>%
   rename(
     Item                 = item,
@@ -344,3 +339,46 @@ summary_4items_pretty <- summary_4items %>%
   arrange(Item)
 
 View(summary_4items_pretty)
+
+# Table 2: three highest and three lowest historical inflation years (All food, 2005–2024)
+allfood_extremes <- allfood_hist %>%
+  select(Year, pct_change) %>%
+  arrange(desc(pct_change)) %>%
+  slice_head(n = 3) %>%
+  mutate(Rank = paste0("Highest #", row_number())) %>%
+  bind_rows(
+    allfood_hist %>%
+      select(Year, pct_change) %>%
+      arrange(pct_change) %>%
+      slice_head(n = 3) %>%
+      mutate(Rank = paste0("Lowest #", row_number()))
+  ) %>%
+  mutate(pct_change = round(pct_change, 1)) %>%
+  select(Rank, Year, pct_change) %>%
+  arrange(desc(pct_change))
+
+allfood_extremes_pretty <- allfood_extremes %>%
+  rename(`Percent change (%)` = pct_change)
+
+View(allfood_extremes_pretty)
+
+# Plot 4: distribution of historical All food CPI percent changes (2005–2024)
+allfood_dist_plot <- ggplot(allfood_hist, aes(x = pct_change)) +
+  geom_histogram(
+    binwidth = 1,
+    boundary = 0,
+    fill = "steelblue",
+    color = "white",
+    alpha = 0.7
+  )+
+  geom_density(aes(y = after_stat(density) * 1), linewidth = 1) +
+  labs(
+    title = "Distribution of U.S. Food Inflation Rate (All food CPI), 2005–2024",
+    subtitle = "Histogram of yearly CPI percent changes with a density curve",
+    x = "Percent change (%)",
+    y = "Count",
+    caption = "Source: USDA Economic Research Service, Food Price Outlook"
+  ) +
+  theme_minimal(base_size = 13)
+
+allfood_dist_plot
