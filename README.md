@@ -47,7 +47,23 @@ Rendering a reproducible Quarto PDF that ties together narrative text, figures, 
 
 ## Repo Structure
 
-Use this section to explain the structure of your repo. This should help visitors quickly figure out where they should look to find certain elements. Further, you can use this space to highlight and briefly explain important/key files in the repo.
+Sec3_FP_Ashley_Ting/
+- Data Sources (CSV)/
+    - CPIForecast.csv
+    - historicalcpi.csv
+- Data Visualizations/
+    - vis_4category_cpi_hist.png
+    - vis_4category_cpi_line.png
+    - vis_allfood_cpi_hist_density.png
+    - vis_allfood_cpi_line.png
+    - vis_allfood_cpi_table.png
+    - vis_allfood_maxmin_table.png
+- MLA9.csl
+- Project_Guidelines.md
+- README.md
+- Sec3_FP_FP_Ashley_Ting.R
+- Sec3_FP_FP_Ashley_Ting.qmd
+- Sec3_FP_FP_Ashley_Ting.pdf
 
 
 ## Authors
